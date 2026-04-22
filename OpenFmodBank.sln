@@ -22,4 +22,11 @@ Global
 		{A1B2C3D4-1111-2222-3333-444455557777}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A1B2C3D4-1111-2222-3333-444455557777}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B8F3C1A2-5E4D-4A9F-8C6B-2D7E9F1A3B5C}
+		StartupProject = OpenFmodBank.App
+	EndGlobalSection
 EndGlobal
