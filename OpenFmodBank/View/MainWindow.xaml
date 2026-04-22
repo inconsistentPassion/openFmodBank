@@ -9,8 +9,9 @@
                  WindowStartupLocation="CenterScreen"
                  ExtendsContentIntoTitleBar="True">
 
-    <ui:FluentWindow.RootNavigation>
+    <Grid>
         <ui:NavigationView
+            x:Name="RootNavigation"
             HeaderVisibility="Collapsed"
             PaneDisplayMode="Left"
             IsBackButtonVisible="Collapsed">
@@ -30,6 +31,6 @@
             </ui:NavigationView.FooterMenuItems>
 
         </ui:NavigationView>
-    </ui:FluentWindow.RootNavigation>
+    </Grid>
 
 </ui:FluentWindow>
