@@ -3,9 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenFmodBank.Core", "src\OpenFmodBank.Core\OpenFmodBank.Core.csproj", "{A1B2C3D4-1111-2222-3333-444455556666}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenFmodBank.App", "src\OpenFmodBank.App\OpenFmodBank.App.csproj", "{A1B2C3D4-1111-2222-3333-444455557777}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenFmodBank", "OpenFmodBank\OpenFmodBank.csproj", "{B8F3C1A2-5E4D-4A9F-8C6B-2D7E9F1A3B5C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,20 +11,16 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A1B2C3D4-1111-2222-3333-444455556666}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A1B2C3D4-1111-2222-3333-444455556666}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A1B2C3D4-1111-2222-3333-444455556666}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A1B2C3D4-1111-2222-3333-444455556666}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A1B2C3D4-1111-2222-3333-444455557777}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A1B2C3D4-1111-2222-3333-444455557777}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A1B2C3D4-1111-2222-3333-444455557777}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A1B2C3D4-1111-2222-3333-444455557777}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8F3C1A2-5E4D-4A9F-8C6B-2D7E9F1A3B5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8F3C1A2-5E4D-4A9F-8C6B-2D7E9F1A3B5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8F3C1A2-5E4D-4A9F-8C6B-2D7E9F1A3B5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8F3C1A2-5E4D-4A9F-8C6B-2D7E9F1A3B5C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {B8F3C1A2-5E4D-4A9F-8C6B-2D7E9F1A3B5C}
-		StartupProject = OpenFmodBank.App
+		SolutionGuid = {A1B2C3D4-E5F6-7890-ABCD-EF1234567890}
+		StartupProject = OpenFmodBank
 	EndGlobalSection
 EndGlobal

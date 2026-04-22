@@ -3,16 +3,13 @@ using System.IO;
 using System.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using OpenFmodBank.Core.Models;
-using OpenFmodBank.Core.Services;
+using OpenFmodBank.Services;
 
-namespace OpenFmodBank.App.ViewModels;
+namespace OpenFmodBank.Core;
 
 public sealed partial class MainViewModel : ObservableObject
 {
     private readonly FmodBankService _bankService;
-
-    // ── State ───────────────────────────────────────────────────────
 
     [ObservableProperty]
     private string _banksPath = Path.Combine(Directory.GetCurrentDirectory(), "banks");
@@ -44,7 +41,17 @@ public sealed partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private string _elapsedText = string.Empty;
 
-    // ── Lifecycle ───────────────────────────────────────────────────
+    [ObservableProperty]
+    private string _fsbankclPath = string.Empty;
+
+    [ObservableProperty]
+    private int _encodingQuality = 85;
+
+    [ObservableProperty]
+    private int _threadCount;
+
+    [ObservableProperty]
+    private bool _forceOverwrite;
 
     public MainViewModel(FmodBankService bankService)
     {
@@ -54,39 +61,37 @@ public sealed partial class MainViewModel : ObservableObject
         EnsureDir(BuildPath);
     }
 
-    // ── Commands ────────────────────────────────────────────────────
-
     [RelayCommand]
     private void BrowseBanks()
     {
-        var path = PickFolder("Select Banks Folder");
-        if (path != null) BanksPath = path;
+        var p = PickFolder("Select Banks Folder");
+        if (p != null) BanksPath = p;
     }
 
     [RelayCommand]
     private void BrowseWavs()
     {
-        var path = PickFolder("Select Output Folder");
-        if (path != null) WavsPath = path;
+        var p = PickFolder("Select Output Folder");
+        if (p != null) WavsPath = p;
     }
 
     [RelayCommand]
     private void BrowseBuild()
     {
-        var path = PickFolder("Select Build Folder");
-        if (path != null) BuildPath = path;
+        var p = PickFolder("Select Build Folder");
+        if (p != null) BuildPath = p;
     }
 
-    [RelayCommand(CanExecute = nameof(CanRun))]
+    [RelayCommand]
     private async Task ExtractAsync()
     {
+        if (IsBusy) return;
         IsBusy = true;
         ConsoleOutput = string.Empty;
         IsIndeterminate = false;
         ProgressValue = 0;
 
         var sw = Stopwatch.StartNew();
-
         try
         {
             var config = BuildConfig();
@@ -124,15 +129,15 @@ public sealed partial class MainViewModel : ObservableObject
         }
     }
 
-    [RelayCommand(CanExecute = nameof(CanRun))]
+    [RelayCommand]
     private async Task RebuildAsync()
     {
+        if (IsBusy) return;
         IsBusy = true;
         ConsoleOutput = string.Empty;
         IsIndeterminate = true;
 
         var sw = Stopwatch.StartNew();
-
         try
         {
             var config = BuildConfig();
@@ -170,15 +175,17 @@ public sealed partial class MainViewModel : ObservableObject
         }
     }
 
-    private bool CanRun() => !IsBusy;
-
     // ── Helpers ─────────────────────────────────────────────────────
 
     private FmodBankConfig BuildConfig() => new()
     {
         BanksPath = BanksPath,
         WavsPath = WavsPath,
-        BuildPath = BuildPath
+        BuildPath = BuildPath,
+        Quality = EncodingQuality,
+        ThreadCount = ThreadCount,
+        ForceOverwrite = ForceOverwrite,
+        FsbankclPath = string.IsNullOrWhiteSpace(FsbankclPath) ? null : FsbankclPath
     };
 
     private void AppendConsole(string line)

@@ -1,24 +1,16 @@
 using System.Diagnostics;
 using System.Text;
 using Fmod5Sharp;
-using Fmod5Sharp.FmodTypes;
 using Microsoft.IO;
-using OpenFmodBank.Core.Models;
+using OpenFmodBank.Core;
 
-namespace OpenFmodBank.Core.Services;
+namespace OpenFmodBank.Services;
 
-/// <summary>
-/// Core service for FMOD Bank extraction and rebuild operations.
-/// All I/O and CPU-intensive work lives here — no UI dependencies.
-/// </summary>
 public sealed class FmodBankService
 {
     private static readonly byte[] SndhMagic = Encoding.ASCII.GetBytes("SNDH");
     private static readonly RecyclableMemoryStreamManager MemPool = new();
 
-    /// <summary>
-    /// Extract audio from .bank files in <paramref name="config"/>.BanksPath.
-    /// </summary>
     public BankOperationResult Extract(FmodBankConfig config, IProgress<BankProgress>? progress = null)
     {
         var sw = Stopwatch.StartNew();
@@ -49,14 +41,12 @@ public sealed class FmodBankService
                 Directory.CreateDirectory(fsbTempDir);
                 var fsbPath = Path.Combine(fsbTempDir, $"{bankName}.fsb");
 
-                // Step 1: Extract FSB from BANK
                 if (!ExtractFsb(bankFile, fsbPath))
                 {
-                    LogWarning(progress, $"Skipping {bankName}.bank — SNDH header not found.");
+                    progress?.Report(new BankProgress { StatusText = $"Skipping {bankName}.bank — no SNDH header." });
                     continue;
                 }
 
-                // Step 2: Unpack FSB samples
                 Directory.CreateDirectory(wavDir);
                 int sampleCount = UnpackFsb(fsbPath, wavDir, progress);
                 totalFiles++;
@@ -69,13 +59,9 @@ public sealed class FmodBankService
                 });
             }
 
-            // Clean up FSB cache
-            var cacheDir = Path.Combine(config.WavsPath, ".fsb_cache");
-            if (Directory.Exists(cacheDir))
-                Directory.Delete(cacheDir, true);
-
-            sw.Stop();
+            CleanupCache(config.WavsPath);
             GC.Collect();
+            sw.Stop();
             return BankOperationResult.Ok(totalFiles, sw.Elapsed);
         }
         catch (Exception ex)
@@ -85,10 +71,6 @@ public sealed class FmodBankService
         }
     }
 
-    /// <summary>
-    /// Rebuild .bank files from previously extracted audio directories.
-    /// Requires FMOD fsbankcl.exe at the configured path.
-    /// </summary>
     public BankOperationResult Rebuild(FmodBankConfig config, IProgress<BankProgress>? progress = null)
     {
         var sw = Stopwatch.StartNew();
@@ -98,16 +80,12 @@ public sealed class FmodBankService
         {
             ValidatePaths(config.BanksPath, config.WavsPath);
 
-            // Resolve fsbankcl path
-            var fsbankclPath = config.FsbankclPath
-                ?? FindFsbankcl();
+            var fsbankclPath = config.FsbankclPath ?? FindFsbankcl();
             if (fsbankclPath == null || !File.Exists(fsbankclPath))
-                return BankOperationResult.Fail(
-                    $"fsbankcl.exe not found. Set FsbankclPath in config or place it at ./FMOD/fsbankcl.exe");
+                return BankOperationResult.Fail("fsbankcl.exe not found. Place in ./FMOD/ or set path in Settings.");
 
             Directory.CreateDirectory(config.BuildPath);
 
-            // Find directories containing files.lst
             var wavDirs = Directory.EnumerateDirectories(config.WavsPath)
                 .Where(d => File.Exists(Path.Combine(d, "files.lst")))
                 .ToList();
@@ -128,37 +106,29 @@ public sealed class FmodBankService
                     CurrentFile = wavDir
                 });
 
-                // Find original bank to reuse its header
                 var originalBankPath = Path.Combine(config.BanksPath, $"{bankName}.bank");
                 if (!File.Exists(originalBankPath))
                 {
-                    LogWarning(progress, $"Skipping {bankName} — original .bank not found.");
+                    progress?.Report(new BankProgress { StatusText = $"Skipping {bankName} — original .bank not found." });
                     continue;
                 }
 
-                // Step 1: Rebuild FSB using fsbankcl
                 var fsbDir = Path.Combine(config.WavsPath, ".fsb_cache");
                 Directory.CreateDirectory(fsbDir);
                 var rebuiltFsbPath = Path.Combine(fsbDir, $"{bankName}.fsb");
 
                 if (!RunFsbankcl(fsbankclPath, lstFile, rebuiltFsbPath, config, progress))
                 {
-                    LogWarning(progress, $"fsbankcl failed for {bankName}.bank");
+                    progress?.Report(new BankProgress { StatusText = $"fsbankcl failed for {bankName}." });
                     continue;
                 }
 
-                // Step 2: Splice rebuilt FSB into original BANK header
                 var outputPath = Path.Combine(config.BuildPath, $"{bankName}.bank");
                 SpliceBank(originalBankPath, rebuiltFsbPath, outputPath);
-
                 totalFiles++;
             }
 
-            // Clean up
-            var cacheDir = Path.Combine(config.WavsPath, ".fsb_cache");
-            if (Directory.Exists(cacheDir))
-                Directory.Delete(cacheDir, true);
-
+            CleanupCache(config.WavsPath);
             sw.Stop();
             return BankOperationResult.Ok(totalFiles, sw.Elapsed);
         }
@@ -169,11 +139,8 @@ public sealed class FmodBankService
         }
     }
 
-    // ── Private helpers ──────────────────────────────────────────────
+    // ── Private ─────────────────────────────────────────────────────
 
-    /// <summary>
-    /// Extract FSB data from a BANK file by locating the SNDH header.
-    /// </summary>
     private static bool ExtractFsb(string bankPath, string fsbOutputPath)
     {
         using var fileStream = File.OpenRead(bankPath);
@@ -181,31 +148,19 @@ public sealed class FmodBankService
         fileStream.CopyTo(memStream);
         memStream.Position = 0;
 
-        var buffer = memStream.GetBuffer();
-        var headerOffset = BinarySearch.Find(buffer, SndhMagic);
-
-        if (headerOffset < 0)
-            return false;
+        var headerOffset = BinarySearch.Find(memStream.GetBuffer(), SndhMagic);
+        if (headerOffset < 0) return false;
 
         using var reader = new BinaryReader(memStream, Encoding.ASCII, leaveOpen: true);
-
-        // SNDH header: magic(4) + unknown(8) + nextOffset(4) + ...
         memStream.Position = headerOffset + 12;
         var nextOffset = reader.ReadInt32();
-
-        // Extract from nextOffset to end
         memStream.Position = nextOffset;
 
         using var output = File.Create(fsbOutputPath);
         memStream.CopyTo(output);
-
         return true;
     }
 
-    /// <summary>
-    /// Unpack all samples from an FSB file to the output directory.
-    /// Returns the number of samples extracted.
-    /// </summary>
     private static int UnpackFsb(string fsbPath, string outputDir, IProgress<BankProgress>? progress)
     {
         var fsbBytes = File.ReadAllBytes(fsbPath);
@@ -215,40 +170,27 @@ public sealed class FmodBankService
 
         foreach (var sample in bank.Samples)
         {
-            if (sample is null)
-                continue;
-
-            if (!sample.RebuildAsStandardFileFormat(out var dataBytes, out var fileExtension))
-                continue;
+            if (sample is null) continue;
+            if (!sample.RebuildAsStandardFileFormat(out var dataBytes, out var fileExtension)) continue;
 
             var fileName = $"{sample.Name}.{fileExtension}";
-            var outputPath = Path.Combine(outputDir, fileName);
-
-            File.WriteAllBytes(outputPath, dataBytes);
+            File.WriteAllBytes(Path.Combine(outputDir, fileName), dataBytes);
             listFile.AppendLine(fileName);
             count++;
         }
 
-        // Write manifest
-        var lstPath = Path.Combine(outputDir, "files.lst");
-        File.WriteAllText(lstPath, listFile.ToString());
-
+        File.WriteAllText(Path.Combine(outputDir, "files.lst"), listFile.ToString());
         return count;
     }
 
-    /// <summary>
-    /// Splice a rebuilt FSB into an original BANK file, preserving the original header.
-    /// </summary>
     private static void SpliceBank(string originalBankPath, string rebuiltFsbPath, string outputPath)
     {
-        // Read original bank
         using var origStream = MemPool.GetStream();
-        using (var origFile = File.OpenRead(originalBankPath))
-            origFile.CopyTo(origStream);
+        using (var f = File.OpenRead(originalBankPath))
+            f.CopyTo(origStream);
 
         origStream.Position = 0;
         var origBuffer = origStream.GetBuffer();
-
         var headerOffset = BinarySearch.Find(origBuffer, SndhMagic);
         if (headerOffset < 0)
             throw new InvalidOperationException("Original bank missing SNDH header.");
@@ -256,43 +198,28 @@ public sealed class FmodBankService
         using var origReader = new BinaryReader(origStream, Encoding.ASCII, leaveOpen: true);
         origStream.Position = headerOffset + 12;
         var headerSize = origReader.ReadInt32();
-
         var fsbSize = (int)new FileInfo(rebuiltFsbPath).Length;
 
-        // Write new bank
-        if (File.Exists(outputPath))
-            File.Delete(outputPath);
+        if (File.Exists(outputPath)) File.Delete(outputPath);
 
         using var outStream = File.Create(outputPath);
         using var outWriter = new BinaryWriter(outStream, Encoding.ASCII, leaveOpen: true);
 
-        // Copy original header
         origStream.Position = 0;
         outStream.Write(origBuffer, 0, headerSize);
 
-        // Patch: update total file size at offset 4
         outWriter.Seek(4, SeekOrigin.Begin);
         outWriter.Write(headerSize + fsbSize - 8);
 
-        // Patch: update FSB offset at SNDH+16
         outWriter.Seek(headerOffset + 16, SeekOrigin.Begin);
         outWriter.Write(fsbSize - (headerSize + 8));
 
-        // Append new FSB
         outWriter.Seek(0, SeekOrigin.End);
         using (var fsbFile = File.OpenRead(rebuiltFsbPath))
             fsbFile.CopyTo(outStream);
     }
 
-    /// <summary>
-    /// Run fsbankcl.exe to rebuild an FSB from extracted audio files.
-    /// </summary>
-    private static bool RunFsbankcl(
-        string fsbankclPath,
-        string lstFile,
-        string outputFsb,
-        FmodBankConfig config,
-        IProgress<BankProgress>? progress)
+    private static bool RunFsbankcl(string path, string lstFile, string outputFsb, FmodBankConfig config, IProgress<BankProgress>? progress)
     {
         var formatArg = config.EncodingFormat switch
         {
@@ -303,19 +230,11 @@ public sealed class FmodBankService
             _ => "-format Vorbis"
         };
 
-        var args = string.Join(" ",
-            "-rebuild",
-            $"-thread_count {config.ResolvedThreadCount}",
-            formatArg,
-            $"-quality {config.Quality}",
-            "-ignore_errors",
-            "-verbosity 5",
-            $"-o \"{outputFsb}\"",
-            $"\"{lstFile}\"");
+        var args = $"-rebuild -thread_count {config.ResolvedThreadCount} {formatArg} -quality {config.Quality} -ignore_errors -verbosity 5 -o \"{outputFsb}\" \"{lstFile}\"";
 
         var psi = new ProcessStartInfo
         {
-            FileName = fsbankclPath,
+            FileName = path,
             Arguments = args,
             UseShellExecute = false,
             RedirectStandardOutput = true,
@@ -324,10 +243,8 @@ public sealed class FmodBankService
         };
 
         using var process = Process.Start(psi);
-        if (process == null)
-            return false;
+        if (process == null) return false;
 
-        // Stream output to progress
         while (!process.StandardOutput.EndOfStream)
         {
             var line = process.StandardOutput.ReadLine();
@@ -339,9 +256,6 @@ public sealed class FmodBankService
         return process.ExitCode == 0;
     }
 
-    /// <summary>
-    /// Auto-locate fsbankcl.exe in common locations.
-    /// </summary>
     private static string? FindFsbankcl()
     {
         var candidates = new[]
@@ -350,7 +264,6 @@ public sealed class FmodBankService
             Path.Combine(Directory.GetCurrentDirectory(), "FMOD", "fsbankcl.exe"),
             Path.Combine(Directory.GetCurrentDirectory(), "fsbankcl.exe"),
         };
-
         return candidates.FirstOrDefault(File.Exists);
     }
 
@@ -358,13 +271,14 @@ public sealed class FmodBankService
     {
         if (!Directory.Exists(banksPath))
             throw new DirectoryNotFoundException($"Banks directory not found: {banksPath}");
-
         if (!Directory.Exists(wavsPath))
             Directory.CreateDirectory(wavsPath);
     }
 
-    private static void LogWarning(IProgress<BankProgress>? progress, string message)
+    private static void CleanupCache(string wavsPath)
     {
-        progress?.Report(new BankProgress { StatusText = $"⚠ {message}" });
+        var cacheDir = Path.Combine(wavsPath, ".fsb_cache");
+        if (Directory.Exists(cacheDir))
+            Directory.Delete(cacheDir, true);
     }
 }

@@ -1,10 +1,9 @@
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
-using OpenFmodBank.App.ViewModels;
-using OpenFmodBank.App.Views;
-using OpenFmodBank.Core.Services;
+using OpenFmodBank.Core;
+using OpenFmodBank.Services;
 
-namespace OpenFmodBank.App;
+namespace OpenFmodBank;
 
 public partial class App : Application
 {
@@ -14,22 +13,21 @@ public partial class App : Application
     {
         var sc = new ServiceCollection();
 
-        // Core services
         sc.AddSingleton<FmodBankService>();
-
-        // ViewModels
         sc.AddTransient<MainViewModel>();
 
         _services = sc.BuildServiceProvider();
     }
 
+    /// <summary>Service locator for View constructors.</summary>
+    public T GetService<T>() where T : notnull =>
+        _services!.GetRequiredService<T>();
+
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
 
-        var mainWindow = new MainWindow();
-        var vm = _services!.GetRequiredService<MainViewModel>();
-        mainWindow.DataContext = vm;
+        var mainWindow = new View.MainWindow();
         mainWindow.Show();
     }
 

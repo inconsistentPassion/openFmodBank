@@ -1,22 +1,14 @@
 # OpenFmodBank
 
-An open-source FMOD Bank extractor and rebuilder. Extract audio files from FMOD `.bank` files, modify them, and rebuild new banks.
+FMOD Bank extractor and rebuilder. Extract audio from FMOD `.bank` files, modify, and rebuild.
 
 **20× faster extraction** | **2× faster rebuilding** | No transcoding — original formats preserved.
 
-## Features
-
-- Extract sounds from FMOD `.bank` files to their original format (no WAV conversion)
-- Rebuild modified banks using `fsbankcl.exe` (FMOD Studio tools)
-- Modern Fluent UI (WPF UI 3.4)
-- Configurable encoding format and quality
-- Clean MVVM architecture with full async support
-
 ## Requirements
 
-- **Windows** (WPF application)
-- **.NET 8.0 Runtime** — [download](https://dotnet.microsoft.com/download/dotnet/8.0)
-- **FMOD fsbankcl.exe** — place in `./FMOD/` folder (only needed for rebuilding)
+- Windows 10/11 x64
+- .NET 8.0 SDK ([download](https://dotnet.microsoft.com/download/dotnet/8.0))
+- FMOD fsbankcl.exe (for rebuilding only — place in `./FMOD/`)
 
 ## Build
 
@@ -25,30 +17,35 @@ dotnet restore
 dotnet build -c Release
 ```
 
+Or open `OpenFmodBank.sln` in Visual Studio 2022.
+
 ## Usage
 
-1. **Place `.bank` files** in the `banks/` folder (or browse to your game's bank directory)
-2. Click **Extract Sounds** — audio files appear in `wavs/<bankName>/`
-3. **Modify** any extracted audio files (keep same format/bitrate, same or shorter duration)
-4. Click **Rebuild Banks** — new `.bank` files appear in `build/`
-5. Copy rebuilt banks back to your game directory
+1. Place `.bank` files in `banks/` folder (or browse to your game directory)
+2. Click **Extract Sounds** — audio appears in `wavs/<bankName>/`
+3. Modify extracted audio (keep same format/bitrate, same or shorter duration)
+4. Click **Rebuild Banks** — new `.bank` files in `build/`
+5. Copy rebuilt banks back to your game
 
 ## Project Structure
 
 ```
-OpenFmodBank/
-├── OpenFmodBank.sln
-├── LICENSE
-└── src/
-    ├── OpenFmodBank.Core/          # Core logic (no UI dependency)
-    │   ├── Models/                 # Config, progress, result types
-    │   └── Services/
-    │       ├── FmodBankService.cs  # Extract & rebuild engine
-    │       └── BinarySearch.cs     # Fast byte pattern search
-    └── OpenFmodBank.App/           # WPF UI application
-        ├── ViewModels/             # MVVM view models
-        ├── Views/                  # XAML views
-        └── Services/               # DI service registrations
+OpenFmodBank.sln
+Directory.Build.props
+OpenFmodBank/                    # WPF Application
+├── App.xaml / App.xaml.cs       # DI + startup
+├── OpenFmodBank.csproj
+├── Core/                        # Business logic
+│   ├── Models.cs                # Config, progress, result types
+│   ├── BinarySearch.cs          # Fast byte pattern search
+│   └── MainViewModel.cs         # Extract/rebind logic + UI state
+├── Services/
+│   └── FmodBankService.cs       # BANK extract & rebuild engine
+└── View/
+    ├── MainWindow.xaml / .cs    # FluentWindow + NavigationView
+    ├── MainPage.xaml / .cs      # Extract & rebuild UI
+    ├── SettingsPage.xaml / .cs  # fsbankcl path, quality, threads
+    └── Converters.cs            # Value converters
 ```
 
 ## Tested With

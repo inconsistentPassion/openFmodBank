@@ -1,8 +1,8 @@
-<ui:FluentWindow x:Class="OpenFmodBank.App.Views.MainWindow"
+<ui:FluentWindow x:Class="OpenFmodBank.View.MainWindow"
                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                  xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-                 xmlns:local="clr-namespace:OpenFmodBank.App.Views"
+                 xmlns:local="clr-namespace:OpenFmodBank.View"
                  Title="OpenFmodBank"
                  Width="920" Height="660"
                  MinWidth="700" MinHeight="500"
@@ -19,14 +19,14 @@
                 <ui:NavigationViewItem
                     Content="Extract &amp; Rebuild"
                     Icon="{ui:SymbolIcon ArrowSync24}"
-                    TargetPageType="{x:Type local:MainView}" />
+                    TargetPageType="{x:Type local:MainPage}" />
             </ui:NavigationView.MenuItems>
 
             <ui:NavigationView.FooterMenuItems>
                 <ui:NavigationViewItem
                     Content="Settings"
                     Icon="{ui:SymbolIcon Settings24}"
-                    TargetPageType="{x:Type local:SettingsView}" />
+                    TargetPageType="{x:Type local:SettingsPage}" />
             </ui:NavigationView.FooterMenuItems>
 
         </ui:NavigationView>

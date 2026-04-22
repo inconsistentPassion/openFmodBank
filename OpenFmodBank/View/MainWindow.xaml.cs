@@ -1,6 +1,6 @@
 using Wpf.Ui.Controls;
 
-namespace OpenFmodBank.App.Views;
+namespace OpenFmodBank.View;
 
 public partial class MainWindow : FluentWindow
 {
