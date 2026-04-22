@@ -1,0 +1,84 @@
+<ui:UiPage x:Class="OpenFmodBank.App.Views.SettingsView"
+           xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+           xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+           xmlns:vm="clr-namespace:OpenFmodBank.App.ViewModels">
+
+    <ui:UiPage.DataContext>
+        <vm:SettingsViewModel />
+    </ui:UiPage.DataContext>
+
+    <Grid Margin="24">
+        <StackPanel MaxWidth="600">
+            <TextBlock Text="Settings" FontSize="24" FontWeight="SemiBold" Margin="0,0,0,20" />
+
+            <!-- fsbankcl path -->
+            <ui:Card Padding="16" Margin="0,0,0,16">
+                <StackPanel>
+                    <TextBlock Text="FMOD fsbankcl.exe Path"
+                               FontWeight="SemiBold" Margin="0,0,0,8" />
+                    <TextBlock Text="Required for bank rebuilding. Auto-detected if placed in ./FMOD/ folder."
+                               Foreground="{ui:ThemeResource TextFillColorSecondaryBrush}"
+                               FontSize="12" Margin="0,0,0,8" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ui:TextBox Grid.Column="0"
+                                    Text="{Binding FsbankclPath, UpdateSourceTrigger=PropertyChanged}" />
+                        <ui:Button Grid.Column="1" Content="Browse" Appearance="Secondary"
+                                   Margin="8,0,0,0" />
+                    </Grid>
+                </StackPanel>
+            </ui:Card>
+
+            <!-- Encoding quality -->
+            <ui:Card Padding="16">
+                <StackPanel>
+                    <TextBlock Text="Rebuild Settings"
+                               FontWeight="SemiBold" Margin="0,0,0,8" />
+
+                    <TextBlock Text="Encoding Quality (1-100):"
+                               Margin="0,4,0,4" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ui:Slider Grid.Column="0"
+                                   Minimum="1" Maximum="100"
+                                   Value="{Binding EncodingQuality}"
+                                   TickFrequency="1" IsSnapToTickEnabled="True" />
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding EncodingQuality, StringFormat='{}{0}'}"
+                                   VerticalAlignment="Center" FontWeight="SemiBold"
+                                   Margin="12,0,0,0" Width="30" />
+                    </Grid>
+
+                    <TextBlock Text="Thread Count (0 = auto):"
+                               Margin="0,12,0,4" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ui:Slider Grid.Column="0"
+                                   Minimum="0" Maximum="32"
+                                   Value="{Binding ThreadCount}"
+                                   TickFrequency="1" IsSnapToTickEnabled="True" />
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding ThreadCount, StringFormat='{}{0}'}"
+                                   VerticalAlignment="Center" FontWeight="SemiBold"
+                                   Margin="12,0,0,0" Width="30" />
+                    </Grid>
+
+                    <ui:ToggleSwitch Margin="0,12,0,0"
+                                     IsChecked="{Binding ForceOverwrite}"
+                                     Content="Force Overwrite (skip confirmation)" />
+                </StackPanel>
+            </ui:Card>
+        </StackPanel>
+    </Grid>
+
+</ui:UiPage>
