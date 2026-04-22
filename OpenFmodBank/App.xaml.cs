@@ -30,10 +30,4 @@ public partial class App : Application
         var mainWindow = new View.MainWindow();
         mainWindow.Show();
     }
-
-    protected override void OnExit(ExitEventArgs e)
-    {
-        _services?.Dispose();
-        base.OnExit(e);
-    }
 }

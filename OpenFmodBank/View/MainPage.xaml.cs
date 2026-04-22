@@ -6,7 +6,7 @@ public partial class MainPage : System.Windows.Controls.Page
     {
         InitializeComponent();
 
-        var vm = ((App)Application.Current).GetService<Core.MainViewModel>();
+        var vm = ((System.Windows.Application.Current as App)!).GetService<Core.MainViewModel>();
         DataContext = vm;
     }
 }
