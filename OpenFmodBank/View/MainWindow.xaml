@@ -10,8 +10,16 @@
                  ExtendsContentIntoTitleBar="True">
 
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <ui:TitleBar Grid.Row="0" Title="OpenFmodBank" />
+
         <ui:NavigationView
             x:Name="RootNavigation"
+            Grid.Row="1"
             HeaderVisibility="Collapsed"
             PaneDisplayMode="Left"
             IsBackButtonVisible="Collapsed">
