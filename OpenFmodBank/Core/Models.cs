@@ -1,14 +1,5 @@
 namespace OpenFmodBank.Core;
 
-public enum FsbEncodingFormat
-{
-    Vorbis,
-    PCM,
-    FADPCM,
-    MP3,
-    AAC
-}
-
 public sealed class FmodBankConfig
 {
     public required string BanksPath { get; init; }

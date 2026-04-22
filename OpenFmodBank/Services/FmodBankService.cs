@@ -118,7 +118,7 @@ public sealed class FmodBankService
                 Directory.CreateDirectory(fsbDir);
                 var rebuiltFsbPath = Path.Combine(fsbDir, $"{bankName}.fsb");
 
-                if (!RunFsbankcl(fsbankclPath, lstFile, rebuiltFsbPath, config, progress))
+                if (!RunFsbankcl(fsbankclPath, lstFile, rebuiltFsbPath, progress))
                 {
                     progress?.Report(new BankProgress { StatusText = $"fsbankcl failed for {bankName}." });
                     continue;
@@ -220,18 +220,9 @@ public sealed class FmodBankService
             fsbFile.CopyTo(outStream);
     }
 
-    private static bool RunFsbankcl(string path, string lstFile, string outputFsb, FmodBankConfig config, IProgress<BankProgress>? progress)
+    private static bool RunFsbankcl(string path, string lstFile, string outputFsb, IProgress<BankProgress>? progress)
     {
-        var formatArg = config.EncodingFormat switch
-        {
-            FsbEncodingFormat.PCM => "-format PCM",
-            FsbEncodingFormat.FADPCM => "-format FADPCM",
-            FsbEncodingFormat.MP3 => "-format MP3",
-            FsbEncodingFormat.AAC => "-format AAC",
-            _ => "-format Vorbis"
-        };
-
-        var args = $"-rebuild -thread_count {Environment.ProcessorCount} {formatArg} -quality 95 -ignore_errors -verbosity 5 -o \"{outputFsb}\" \"{lstFile}\"";
+        var args = $"-rebuild -thread_count {Environment.ProcessorCount} -format Vorbis -quality 95 -ignore_errors -verbosity 5 -o \"{outputFsb}\" \"{lstFile}\"";
 
         var psi = new ProcessStartInfo
         {
