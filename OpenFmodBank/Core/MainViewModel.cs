@@ -18,9 +18,6 @@ public sealed partial class MainViewModel : ObservableObject
     private string _wavsPath = Path.Combine(Directory.GetCurrentDirectory(), "wavs");
 
     [ObservableProperty]
-    private string _buildPath = Path.Combine(Directory.GetCurrentDirectory(), "build");
-
-    [ObservableProperty]
     private bool _isBusy;
 
     [ObservableProperty]
@@ -45,12 +42,6 @@ public sealed partial class MainViewModel : ObservableObject
     private string _fsbankclPath = string.Empty;
 
     [ObservableProperty]
-    private int _encodingQuality = 85;
-
-    [ObservableProperty]
-    private int _threadCount;
-
-    [ObservableProperty]
     private bool _forceOverwrite;
 
     public MainViewModel(FmodBankService bankService)
@@ -58,7 +49,6 @@ public sealed partial class MainViewModel : ObservableObject
         _bankService = bankService;
         EnsureDir(BanksPath);
         EnsureDir(WavsPath);
-        EnsureDir(BuildPath);
     }
 
     [RelayCommand]
@@ -73,13 +63,6 @@ public sealed partial class MainViewModel : ObservableObject
     {
         var p = PickFolder("Select Output Folder");
         if (p != null) WavsPath = p;
-    }
-
-    [RelayCommand]
-    private void BrowseBuild()
-    {
-        var p = PickFolder("Select Build Folder");
-        if (p != null) BuildPath = p;
     }
 
     [RelayCommand]
@@ -181,9 +164,7 @@ public sealed partial class MainViewModel : ObservableObject
     {
         BanksPath = BanksPath,
         WavsPath = WavsPath,
-        BuildPath = BuildPath,
-        Quality = EncodingQuality,
-        ThreadCount = ThreadCount,
+        BuildPath = WavsPath,
         ForceOverwrite = ForceOverwrite,
         FsbankclPath = string.IsNullOrWhiteSpace(FsbankclPath) ? null : FsbankclPath
     };

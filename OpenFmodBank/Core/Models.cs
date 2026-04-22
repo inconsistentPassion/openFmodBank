@@ -15,12 +15,7 @@ public sealed class FmodBankConfig
     public required string WavsPath { get; init; }
     public required string BuildPath { get; init; }
     public string? FsbankclPath { get; init; }
-    public FsbEncodingFormat EncodingFormat { get; init; } = FsbEncodingFormat.Vorbis;
-    public int Quality { get; init; } = 85;
-    public int ThreadCount { get; init; } = 0;
     public bool ForceOverwrite { get; init; } = false;
-
-    public int ResolvedThreadCount => ThreadCount > 0 ? ThreadCount : Environment.ProcessorCount;
 }
 
 public sealed class BankProgress

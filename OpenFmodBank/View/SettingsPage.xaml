@@ -27,43 +27,8 @@
             </ui:Card>
 
             <ui:Card Padding="16">
-                <StackPanel>
-                    <TextBlock Text="Rebuild Settings" FontWeight="SemiBold" Margin="0,0,0,8" />
-
-                    <TextBlock Text="Encoding Quality (1-100):" Margin="0,4,0,4" />
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <Slider Grid.Column="0" Minimum="1" Maximum="100"
-                                   Value="{Binding EncodingQuality}"
-                                   TickFrequency="1" IsSnapToTickEnabled="True" />
-                        <TextBlock Grid.Column="1"
-                                   Text="{Binding EncodingQuality, StringFormat='{}{0}'}"
-                                   VerticalAlignment="Center" FontWeight="SemiBold"
-                                   Margin="12,0,0,0" Width="30" />
-                    </Grid>
-
-                    <TextBlock Text="Thread Count (0 = auto):" Margin="0,12,0,4" />
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <Slider Grid.Column="0" Minimum="0" Maximum="32"
-                                   Value="{Binding ThreadCount}"
-                                   TickFrequency="1" IsSnapToTickEnabled="True" />
-                        <TextBlock Grid.Column="1"
-                                   Text="{Binding ThreadCount, StringFormat='{}{0}'}"
-                                   VerticalAlignment="Center" FontWeight="SemiBold"
-                                   Margin="12,0,0,0" Width="30" />
-                    </Grid>
-
-                    <ui:ToggleSwitch Margin="0,12,0,0"
-                                     IsChecked="{Binding ForceOverwrite}"
-                                     Content="Force Overwrite (skip confirmation)" />
-                </StackPanel>
+                <ui:ToggleSwitch IsChecked="{Binding ForceOverwrite}"
+                                  Content="Force Overwrite (skip confirmation)" />
             </ui:Card>
         </StackPanel>
     </Grid>

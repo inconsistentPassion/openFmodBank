@@ -231,7 +231,7 @@ public sealed class FmodBankService
             _ => "-format Vorbis"
         };
 
-        var args = $"-rebuild -thread_count {config.ResolvedThreadCount} {formatArg} -quality {config.Quality} -ignore_errors -verbosity 5 -o \"{outputFsb}\" \"{lstFile}\"";
+        var args = $"-rebuild -thread_count {Environment.ProcessorCount} {formatArg} -quality 95 -ignore_errors -verbosity 5 -o \"{outputFsb}\" \"{lstFile}\"";
 
         var psi = new ProcessStartInfo
         {

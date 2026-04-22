@@ -6,7 +6,6 @@
 
     <Page.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
-        <local:InvertBooleanConverter x:Key="InvertBool" />
     </Page.Resources>
 
     <Grid Margin="24">
@@ -47,7 +46,7 @@
                                Command="{Binding BrowseBanksCommand}" Margin="8,0,0,0" />
                 </Grid>
 
-                <Grid Margin="0,0,0,10">
+                <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="120" />
                         <ColumnDefinition Width="*" />
@@ -60,21 +59,6 @@
                                 IsReadOnly="{Binding IsBusy}" />
                     <ui:Button Grid.Column="2" Content="Browse" Appearance="Secondary"
                                Command="{Binding BrowseWavsCommand}" Margin="8,0,0,0" />
-                </Grid>
-
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="120" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Build folder:"
-                               VerticalAlignment="Center" FontWeight="Medium" />
-                    <ui:TextBox Grid.Column="1"
-                                Text="{Binding BuildPath, UpdateSourceTrigger=PropertyChanged}"
-                                IsReadOnly="{Binding IsBusy}" />
-                    <ui:Button Grid.Column="2" Content="Browse" Appearance="Secondary"
-                               Command="{Binding BrowseBuildCommand}" Margin="8,0,0,0" />
                 </Grid>
             </StackPanel>
         </ui:Card>
