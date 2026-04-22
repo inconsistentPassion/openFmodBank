@@ -36,7 +36,7 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <ui:Slider Grid.Column="0" Minimum="1" Maximum="100"
+                        <Slider Grid.Column="0" Minimum="1" Maximum="100"
                                    Value="{Binding EncodingQuality}"
                                    TickFrequency="1" IsSnapToTickEnabled="True" />
                         <TextBlock Grid.Column="1"
@@ -51,7 +51,7 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <ui:Slider Grid.Column="0" Minimum="0" Maximum="32"
+                        <Slider Grid.Column="0" Minimum="0" Maximum="32"
                                    Value="{Binding ThreadCount}"
                                    TickFrequency="1" IsSnapToTickEnabled="True" />
                         <TextBlock Grid.Column="1"

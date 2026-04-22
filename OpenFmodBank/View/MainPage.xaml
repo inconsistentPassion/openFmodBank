@@ -116,7 +116,7 @@
                            Foreground="{ui:ThemeResource TextFillColorSecondaryBrush}"
                            Margin="0,0,0,8" />
 
-                <ui:ProgressBar Grid.Row="1"
+                <ProgressBar Grid.Row="1"
                                 IsIndeterminate="{Binding IsIndeterminate}"
                                 Value="{Binding ProgressValue}"
                                 Maximum="{Binding ProgressMaximum}"
